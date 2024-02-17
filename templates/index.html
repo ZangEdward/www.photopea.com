@@ -1,0 +1,235 @@
+﻿
+<!DOCTYPE html> 
+
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0" />
+		
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700,700i" />
+		<link rel="stylesheet" href="templates.css" />
+		
+		<title>PSD Templates</title>
+		<meta name="description" content="Free PSD Templates">
+		<script>fetch("//www.photopea.com/papi/event.php?id=web_Templates");</script>
+		
+		<script src="templates.js"></script>
+		<script>
+		
+			var tpls, IFR=false, TYPE=0, RSRC=[], OTPLS;
+			var ccat = -1, caut = -1, citm = -1, ordr = 0, cscr = 0;  // current scroll
+			var lo=localStorage.getItem("ordr");  if(lo) lo=JSON.parse(lo);  if(lo && lo[1]>Date.now()-30000) ordr=lo[0];
+			var cont, cats, search, back, itms, kwds, add_link;
+			function clearNode(node) {  while(node.firstChild) node.removeChild(node.firstChild);  }
+			function isDisplayed(nd) {  while(true) {  if(nd==document) return true;  if(nd==null) return false;  nd=nd.parentNode;  }  }
+			
+			function go() {
+				cont = document.getElementById("cont");
+				cats = document.getElementById("cats");
+				kwds = document.getElementById("kwds");
+				search = document.getElementById("search");
+				back = document.getElementById("back");  cont.removeChild(back);
+				itms = document.getElementById("itms");
+				add_link = document.getElementById("add_link");
+				window.addEventListener("resize",onResize,false);  onResize();
+			
+				var request = new XMLHttpRequest();
+				request.open("GET", "../papi/tpls.json?r="+Date.now(), true);
+				request.onload = imgsLoaded;
+				request.onerror = function(e) {  console.log(e.target.response);  }
+				request.send();
+				
+				if(Math.random()<0.01) {
+					var request = new XMLHttpRequest();
+					request.open("GET", "../papi/img/reduce.php", true);
+					request.send();
+				}
+				
+				if(Math.random()<0.01) {
+					var request = new XMLHttpRequest();
+					request.open("GET", "https://www.photopea.com/papi/updateTemplates.php", true);
+					request.send();
+				}
+				
+				window.onbeforeunload = trackScroll;
+			}
+			function trackScroll()  {  var scrl=[Date.now(),ccat,caut,itms.scrollTop];  if(citm==-1) localStorage.setItem("scrl",JSON.stringify(scrl));  }
+			function onResize() {
+				if(tpls) updateView();
+			}
+			
+			function imgsLoaded(e) {
+				var hr=window.location.href, sch = hr.slice(hr.indexOf("/templates")+11);
+				var uprt = sch.split("?");
+				if(uprt[1]) {
+					var prts=uprt[1].split("&");
+					for(var i=0; i<prts.length; i++) {  
+						var kv=prts[i].split("=");  
+						if(kv[0]=="type") TYPE=parseInt(kv[1]);
+						else if(kv[0]=="rsrc") RSRC=kv[1].length==0 ? [] : kv[1].split(",");
+						//else console.log(kv);
+					}
+				}
+				
+				IFR = window.top!=window.self;
+				OTPLS = JSON.parse(e.target.response);
+				tpls  = JSON.parse(e.target.response);
+				tpls.categories = tpls.categories[TYPE];
+				for(var i=0; i<tpls.list.length; i++) if(tpls.list[i][0]!=TYPE) {  tpls.list.splice(i,1);  i--;  }
+				
+				rebuild(sch, true);				
+			}
+			
+			function rebuild(sch, firstTime) {
+				console.log(sch);
+				if(!firstTime) trackScroll();
+				citm=-1;
+				if(caut<-1) caut=-1;
+				if(sch[0]=="-") {
+					if(sch[1]=="a") caut=-1;
+					if(sch[1]=="c") ccat=-1;
+				}
+				else if(sch!="") {  					
+					var ci = sch.slice(2).split("?")[0].split("&")[0];  // Facebook might add "?" parameters
+					if(sch[0]=="c") {
+						var cts=tpls["categories"];
+						for(var c in cts) if(toCat(cts[c])==ci) ccat=parseInt(c.slice(1));
+					}
+					if(sch[0]=="t") {
+						var lst=tpls["list"];
+						for(var i=0; i<lst.length; i++) if(tempID(lst[i])==ci) citm = i;
+					}
+					if(sch[0]=="a") {
+						var lst=tpls["authors"];
+						for(var i=0; i<lst.length; i++) if(lst[i][0]==ci) caut = i;
+					}
+					if(sch=="authors"  ) caut=-2;
+					if(sch=="installed") caut=-3;
+				}
+				console.log(citm,caut);
+				var tit="PSD Templates";
+				if(ccat!=-1) tit=tpls.categories["c"+ccat] + " | "+tit;
+				if     (caut==-2) tit="Top Authors";
+				else if(caut==-3) tit="Installed";
+				else if(caut!=-1) tit="By "+tpls.authors   [caut][ 1] + " | "+tit;
+				if(citm!=-1) tit=tpls.list      [citm][ 9] + " | "+tit;
+				if(citm!=-1) document.head.children.namedItem("description").content = tpls.list[citm][9];
+				document.title = tit;
+				
+				updateView();
+				
+				itms.scrollTop="0";
+				var scrl = localStorage.getItem("scrl");
+				if(scrl) {
+					scrl=JSON.parse(scrl);  if(scrl.length==null) return;
+					if(citm==-1 && Date.now()-scrl[0]<60e3 && scrl[1]==ccat && scrl[2]==caut) itms.scrollTop = scrl[3];
+				}	
+			}
+			
+			function updateView() {
+				var w = window.innerWidth, h=window.innerHeight;
+				var sh = 90;  if(w<1000) sh=130;  if(w<800) sh=160;
+				itms.style.height=(h-sh)+"px";
+				cats.style.height=(h- 1)+"px";
+				
+				add_link.style.display=(false?"none":"inline-block");
+				add_link.textContent = TYPE==0 ? "Add your own template!" : (TYPE==1 ? "Add your own plugin!":"");
+				add_link.setAttribute("href",
+					TYPE==0 ? "//www.photopea.com/tuts/publish-your-psd-templates-in-photopea/" : "//www.photopea.com/api/plugins");
+			
+				var tpl=citm!=-1 ? tpls.list[citm]:null;
+				var comp;
+				if(ordr==0) comp=function(a,b) {return cost0(b)-cost0(a);}
+				if(ordr==1) comp=function(a,b) {return cost1(b)-cost1(a);}
+				if(ordr==2) comp=function(a,b) {return cost2(b)-cost2(a);}
+				tpls.list.sort(comp);
+				if(tpl) citm=tpls.list.indexOf(tpl);
+				
+				if(citm==-1 && !isDisplayed(search)) {  clearNode(cont);  cont.appendChild(search);  cont.appendChild(itms);  }
+				if(citm!=-1) {  clearNode(cont);  cont.appendChild(back);  cont.appendChild(itms);  }
+				clearNode(itms);
+				
+				var twds = kwds.value.trim().toLowerCase(), wds=twds.split(/[ ,]+/);
+				var out = [];
+				if     (caut==-2) printAuthors  (tpls, out);
+				else if(caut==-3) printInstalled(tpls, out);
+				else              makeView(tpls,out,twds,wds,ccat,caut,citm);
+				
+				itms.innerHTML=out.join("\n");
+				
+				var out = [];
+				getCats(tpls,ccat,out);
+				cats.innerHTML = out.join("\n");
+				
+				if(citm==-1) {
+					var ords = document.getElementsByClassName("order");
+					for(var i=0; i<3; i++) ords[i].setAttribute("class", "order"+(i==ordr ? " blue":""));
+				}
+			}			
+			
+			function backClicked(e) {
+				if(IFR) rebuild("");
+				else history.back();
+				/*
+				citm = -1;
+				updateView();
+				itms.scrollTo(0,cscr); */
+			}
+			function itemClicked(id) {
+				if(IFR) {
+					if(id==null) id = tpls.list[citm][3];
+					var ii=RSRC.indexOf(id);
+					var msg = "--ot "+id;
+					if(TYPE!=0) {
+						if(ii==-1) RSRC.push(id);  else RSRC.splice(ii,1);
+						msg = "--ur "+RSRC.join(",");
+						updateView();
+					}
+					window.parent.postMessage(msg);
+				}
+				else window.open("//www.Photopea.com#t"+tempID(tpls.list[citm]));
+			}
+			function catClicked(nc) {
+				if(nc==ccat) ccat=-1;
+				else ccat=nc;
+				citm=-1;
+				updateView();
+			}
+			function setOrder(ord) {
+				ordr=ord;  localStorage.setItem("ordr",JSON.stringify([ordr, Date.now()]));
+				updateView();
+				itms.scrollTo(0,0);
+			}
+			var __time=0;
+			function labelClicked(e) {
+				var ot = __time;  __time=Date.now();  if(__time-ot>200) return;
+				var ci = tpls.list[citm];  
+				var str=tpls.authors[ci[1]][0]+","+ci[3];
+				if(window.parent) window.parent.postMessage("--et "+str,"*");
+				//alert(str);
+			}
+		</script>
+	</head>
+	
+	<body onload="go()" class="flexrow">	
+		
+		<div id="cats" class="scrollable">
+		</div>
+	
+		<div id="cont">
+			<div id="search">
+				<span onclick="setOrder(0)" class="order blue">Hot</span>
+				<span onclick="setOrder(1)" class="order">New</span>
+				<span onclick="setOrder(2)" class="order" style="margin-right:2em">Top</span>
+				<span style="display:inline-block">
+					<label>Search:</label> <input type="text" id="kwds" oninput="updateView()" style="margin-right:1.5em;"></input>
+				</span>
+				<a id="add_link" href="//www.photopea.com/tuts/publish-your-psd-templates-in-photopea/" target="_blank">Add your own template!</a>
+			</div>
+			<div id="back">
+				<span class="back" onclick="backClicked()">&lt; Back</span>
+			</div>
+			<div id="itms" class="scrollable"></div>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,56 @@
+﻿			
+			
+	body {  background-color:#333333;  font-family:"Open Sans";  color:#a5a5a5;  padding:0; margin:0;  font-size:14px;  }
+	
+	#cont {  background-color:#1d1d1d;  padding: 26px 0 0 30px;  width:100%;  }
+	
+	a {  /*text-decoration: inherit;*/  color: inherit;  }
+	
+	.title {  display:block;  color:white;  }
+	.item {  position:relative;   display:inline-block;  margin:0 14px 20px 0;  overflow:hidden;  }
+	.item img {  height: 100%; width: 100%; object-fit: contain;  cursor:pointer;  }
+	.item img:hover {  object-fit: cover;  }
+	.cat {  margin:9px;  padding:2px 0px;  cursor:pointer;  }
+	.top {  margin-left: 0px;  }
+	.clickable: {  cursor:pointer;  }
+	.blue {  border-bottom: 3px solid #00eeff;  margin-bottom:-3px;  }
+	.clickable:hover {color:#00eeff;}
+	.back {  display:inline-block; background-color:rgba(0,0,0,0.5);  cursor:pointer;  padding:6px 1em;  margin: 0.2em 0 0.6em 0;  font-size:1.5em;  }
+	.count {  float:right;  }
+	.cat_title {font-size:1.6em;  display:inline-block;  margin:4px 0 10px 0;}
+	.t2 {font-size:1.2em;  }
+	.openimg {opacity:0;   text-align:center; font-size:4em; position:absolute; top:0; left:0;  cursor:pointer; 
+		color:white; background-color:rgba(0,0,0,0.5);  text-shadow: 0 0 8px black; }
+	.openimg:hover {opacity:1;}
+	h1 {font-size:2em;  margin-top:0;  margin-bottom:0.4em;  font-weight:normal; }
+	#cats {  padding:0px 20px;  min-width:180px;  color:white;  }
+	#cats a {  text-decoration:none;  }
+	#search {  font-size:1.3em;  margin-bottom: 24px;  line-height:2em;  }
+	#kwds {  font-size:1.0em;  background-color: black;  border:none;  color:white;  padding:3px; margin-left:0.5em;  }
+	
+	.order {  margin-right:1.5em;  cursor:pointer;  }
+	
+	.post {min-width:1000px; margin-top:4px;}
+	.post_big {  padding:24px;  }
+	.clc {  text-decoration:none;  }
+	.clc:hover {  color:#00eeff;  }
+		
+	.scrollable {
+		overflow-y: scroll;
+		/* for Firefox: */
+		scrollbar-color: #222222 #1d1d1d;
+		scrollbar-width: thin;
+	}
+	.scrollable::-webkit-scrollbar {
+	  width: 8px;
+	  background: #1d1d1d; 
+	}
+	.scrollable::-webkit-scrollbar-thumb {
+		background: rgba(255,255,255,0.5); 
+		border-radius: 6px;
+		margin:4px;
+	}
+	.flexrow {
+		display:flex;
+		flex-flow:row;
+	}
